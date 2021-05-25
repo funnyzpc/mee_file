@@ -22,9 +22,21 @@
 + api
   - 验证
   `http://127.0.0.1:8012/auth`
-  - 上传
-  `http://127.0.0.1:8012/upload`[POST]
+  
+  - 上传(POST)
+  `http://127.0.0.1:8012/upload`
+  
   - 目录文件
   `http://127.0.0.1:8012/list_api`
+  
   - 下载
   `http://127.0.0.1:8012/download`
+
++ 打包
+  - `cargo build --release`
+  - `cd target/release`
+  - `mee_file.exe` 即是
+  
+  - 若加壳(需安装upx): 
+  
+    `upx --brute mee_file.exe`
