@@ -39,4 +39,4 @@
   
   - 若加壳(需安装upx): 
   
-    `upx --brute mee_file.exe`
+    `upx --backup --brute mee_file.exe`
