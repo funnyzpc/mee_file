@@ -8,11 +8,11 @@ use env_logger::Env;
 #[macro_use]
 extern crate log;
 
-#[path= "./handle/auth_handle.rs"] mod auth_handle;
-#[path= "./handle/index_handle.rs"] mod index_handle;
-#[path= "./handle/upload_handle.rs"] mod upload_handle;
-#[path= "./handle/download_handle.rs"] mod download_handle;
-#[path= "./handle/list_handle.rs"] mod list_handle;
+// #[path= "./handle/auth_handle.rs"] mod auth_handle;
+mod handle;
+use crate::handle::{auth_handle,index_handle,upload_handle,download_handle,list_handle};
+mod structs;
+mod util;
 
 // const BASE_DIR:&str = if cfg!(target_os = "windows") {  "D:\\tmp" }else{ "/tmp" };
 
@@ -26,8 +26,10 @@ async fn main() -> std::io::Result<()> {
     // base 文件目录(必须在.env文件配置)
     let base_dir = std::env::var("BASE_DIR").expect("配置不存在::BASE_DIR");
     let server_port = std::env::var("SERVER_PORT").expect("配置不存在::SERVER_PORT");
+    let context_path = std::env::var("CONTEXT_PATH").expect("配置不存在::CONTEXT_PATH");
+
     let date_time = chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S.%f").to_string();
-    println!("{} server start at http://127.0.0.1:{}{}",date_time,server_port,&base_dir);
+    println!("{} server start at http://127.0.0.1:{}{}",date_time,server_port,&context_path);
     std::fs::create_dir_all(base_dir).unwrap();
     // log init
     env_logger::init_from_env(Env::default().default_filter_or("debug"));

@@ -4,15 +4,19 @@ use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use chrono::{Local, Timelike};
 
-#[path= "../util/auth_util.rs"] mod auth_util;
-#[path= "../structs/mod.rs"] mod structs;
+/*#[path= "../util/auth_util.rs"] mod auth_util;
+#[path= "../structs/mod.rs"] mod structs;*/
+
+use crate::structs::result_build::ResultBuild;
+use crate::structs::download_file::DownLoadFile;
+use crate::util::auth_util;
 
 /// 文件上传模块
 
 // const BASE_DIR:&str = if cfg!(target_os = "windows") {  "D:\\tmp" }else{ "/tmp" };
 
 // 下载文件
-pub async fn download(request: HttpRequest, file: web::Query<structs::DownLoadFile>) -> HttpResponse {
+pub async fn download(request: HttpRequest, file: web::Query<DownLoadFile>) -> HttpResponse {
     let headers = request.headers();
     println!("download_file::headers=>{:?}",headers);
     println!("download_file::file=>{:?}",&file);
@@ -20,14 +24,14 @@ pub async fn download(request: HttpRequest, file: web::Query<structs::DownLoadFi
     let (auth_result,msg) = auth_util::auth(headers);
     if !auth_result{
         println!("验证[不]通过:{}",msg);
-        return HttpResponse::NotFound().json(structs::ResultBuild::<i8>::fail_with_msg(msg));
+        return HttpResponse::NotFound().json(ResultBuild::<i8>::fail_with_msg(msg));
     }
 
     let base_dir = std::env::var("BASE_DIR").unwrap();
     // example: oneleaf_tb_ad/2104211116461000.xlsx
     let file_path = &file.file_path.as_ref();
     if file_path.is_none(){
-        return HttpResponse::NotFound().json(structs::ResultBuild::<String>::fail_with_msg("参数缺失[file_path]"));
+        return HttpResponse::NotFound().json(ResultBuild::<String>::fail_with_msg("参数缺失[file_path]"));
     }
     let file_path = file_path.unwrap();
 
@@ -37,7 +41,7 @@ pub async fn download(request: HttpRequest, file: web::Query<structs::DownLoadFi
     if !file_path_object.exists() {
         let msg = format!("下载文件不存在:{}",&file_path);
         println!("{}",msg);
-        return HttpResponse::NotFound().json(structs::ResultBuild::<&str>::fail_with_msg(msg.as_str()));
+        return HttpResponse::NotFound().json(ResultBuild::<&str>::fail_with_msg(msg.as_str()));
     }
     // example: 2104211116461000.xlsx
     let file_name = file_path_object.file_name().unwrap().to_str();
