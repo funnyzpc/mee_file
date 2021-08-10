@@ -1,7 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse};
 
 /*#[path= "../util/auth_util.rs"] mod auth_util;
-#[path= "../structs/mod.rs"] mod structs;*/
+#[path= "../structs/handle_page"] mod structs;*/
 use crate::structs::result_build::ResultBuild;
 use crate::util::auth_util;
 
@@ -12,10 +12,10 @@ pub async fn auth(request:HttpRequest)->HttpResponse{
     let (result,msg) = auth_util::auth(headers);
     if result{
         println!("验证通过:{}",&msg);
-        HttpResponse::Ok().json(ResultBuild::<i32>::success())
+        HttpResponse::Ok().json(ResultBuild::<&str>::success())
     }else{
         println!("验证[不]通过:{}",msg);
-        HttpResponse::Ok().json(ResultBuild::<i32>::fail_with_msg(msg))
+        HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg(msg))
     }
 }
 

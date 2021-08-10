@@ -4,9 +4,7 @@ use actix_web::{HttpResponse};
 
 // 主页
 pub async fn index() -> HttpResponse {
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(INDEX_HTML)
+    HttpResponse::Ok().content_type("text/html; charset=utf-8").body(INDEX_HTML)
 }
 
 const  INDEX_HTML:&str =

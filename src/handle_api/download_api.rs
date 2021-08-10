@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use chrono::{Local, Timelike};
 
 /*#[path= "../util/auth_util.rs"] mod auth_util;
-#[path= "../structs/mod.rs"] mod structs;*/
+#[path= "../structs/handle_page"] mod structs;*/
 
 use crate::structs::result_build::ResultBuild;
 use crate::structs::download_file::DownLoadFile;
@@ -16,7 +16,8 @@ use crate::util::auth_util;
 // const BASE_DIR:&str = if cfg!(target_os = "windows") {  "D:\\tmp" }else{ "/tmp" };
 
 // 下载文件
-pub async fn download(request: HttpRequest, file: web::Query<DownLoadFile>) -> HttpResponse {
+pub async fn download_api(request: HttpRequest, file: web::Query<DownLoadFile>) -> HttpResponse {
+    println!("enter=>download_api");
     let headers = request.headers();
     println!("download_file::headers=>{:?}",headers);
     println!("download_file::file=>{:?}",&file);

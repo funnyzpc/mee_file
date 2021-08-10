@@ -4,12 +4,14 @@ use std::collections::HashMap;
 use std::path::Path;
 
 /*#[path= "../util/auth_util.rs"] mod auth_util;
-#[path= "../structs/mod.rs"] mod structs;*/
+#[path= "../structs/handle_page"] mod structs;*/
 use crate::structs::result_build::ResultBuild;
 use crate::util::auth_util;
 
 // 列出指定目录文件
 pub async fn list_api(request: HttpRequest, params: web::Query<HashMap<String,String>>) -> HttpResponse {
+    println!("mee_file => list_api");
+
     let headers = request.headers();
     println!("list_file::headers=>{:?}",headers);
     info!("list_file::headers=>{:?}",headers);

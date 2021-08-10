@@ -5,7 +5,7 @@ use std::io::Write;
 use std::fs;
 
 /*#[path= "../util/auth_util.rs"] mod auth_util;
-#[path= "../structs/mod.rs"] mod structs;*/
+#[path= "../structs/handle_page"] mod structs;*/
 use crate::structs::result_build::ResultBuild;
 use crate::util::auth_util;
 
@@ -14,6 +14,7 @@ use crate::util::auth_util;
 // const BASE_DIR:&str = if cfg!(target_os = "windows") {  "D:\\tmp" }else{ "/tmp" };
 
 // 用户手动上传文件
+#[allow(dead_code)]
 pub async fn upload(mut payload: Multipart, request: HttpRequest) -> Result<HttpResponse, Error> {
     let headers = request.headers();
     println!("upload_file::headers=>{:?}",headers);
