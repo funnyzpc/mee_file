@@ -38,15 +38,17 @@ pub async fn upload(mut payload: Multipart, request: HttpRequest) -> Result<Http
     while let Ok(Some(mut field)) = payload.try_next().await {
         let content_type = field.content_disposition().unwrap();
         let content_name = content_type.get_name();
-        if content_name==Some(""){
-            return Ok(HttpResponse::Ok().json(ResultBuild::<i8>::fail_with_msg("KEY缺失[1]")));
+        if content_name.is_none(){
+            return Ok(HttpResponse::Ok().json(ResultBuild::<i8>::fail_with_msg("字段名缺失")));
         }
         println!("content_name:{}",content_name.unwrap());
-        let filename = content_type.get_filename().unwrap();
-        println!("filename:{},content_name:{}",filename,content_name.unwrap());
-        if filename==""{
+        let filename = content_type.get_filename();
+        // println!("filename:{},content_name:{}",filename,content_name.unwrap());
+        if filename.is_none(){
             return Ok(HttpResponse::Ok().json(ResultBuild::<String>::fail_with_msg("文件名缺失[2]")));
         }
+        let filename = filename.unwrap();
+
         let file_path = format!("{}/{}", perfix_path, sanitize_filename::sanitize(&filename));
 
         let file_path_item = format!("{}/{}/{}", path,date_path, &filename);

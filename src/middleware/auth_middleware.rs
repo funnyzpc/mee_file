@@ -74,11 +74,11 @@ impl<S, B> Service for AuthenticationMiddleware<S>
             let auth_str = auth_header.value();
             if auth_str.starts_with("bearer") || auth_str.starts_with("Bearer") {
                 let token = auth_str[6..auth_str.len()].trim();
-                println!("before::decode_token");
+                // println!("before::decode_token");
                 if let Ok(token_data) = UserToken::decode_token(token.to_string()) {
-                    println!("after::decode_token");
+                    // println!("after::decode_token");
                     if UserToken::verify_token(&token_data).is_ok() {
-                        println!("after::verify_token");
+                        // println!("after::verify_token");
                         let fut = self.service.call(req);
                         return Box::pin(async move {
                             let res = fut.await?;

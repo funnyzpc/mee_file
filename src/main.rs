@@ -24,7 +24,7 @@ mod util;
 mod handle_api;
 mod handle_page;
 use crate::handle_api::{auth_api,upload_api,download_api,list_api};
-use crate::handle_page::{index, login, list, download};
+use crate::handle_page::{index, login, list, download, upload};
 use handlebars::Handlebars;
 
 
@@ -68,13 +68,15 @@ async fn main() -> std::io::Result<()> {
             // 后台
             .service(web::scope(context_path.as_str())
                 .app_data(hb_ref.clone())
+                .app_data(web::PayloadConfig::new(1024*1024*256))// 256MB
                 .wrap(middleware::auth_middleware::Authentication)
                 .wrap_fn(|request,service|{service.call(request).map(|response|response)  })
                 .route("",web::get().to(index::index))
                 .route("login",web::get().to(login::login_index))
                 .route("login",web::post().to(login::login))
-                .route("/list",web::get().to(list::list))
+                .route("list",web::get().to(list::list))
                 .route("download",web::get().to(download::download))
+                .route("upload",web::post().to(upload::upload))
             )
             // .service(Files::new(&format!("{}/{}",context_path,"list"), base_dir).show_files_listing())
         // 定位所有文件

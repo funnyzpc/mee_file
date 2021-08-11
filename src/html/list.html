@@ -5,6 +5,7 @@
     <meta content="no-cache,must-revalidate" http-equiv="Cache-Control">
     <meta content="no-cache" http-equiv="pragma">
     <meta content="0" http-equiv="expires">
+    <meta http-equiv="Cache" content="no-cache">
     <meta content="telephone=no, address=no" name="format-detection">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,7 +15,10 @@
 <body>
 <div class="main">
     <div class="idx_title">
-        <h2>目录: {{file_dir}}</h2>
+        <div style="display:inline-block;">
+            <span style="font-weight:bold;font-size:24px;margin-right:32px;">目录: {{file_dir}} </span>
+            <span style="font-size:16px;" title="上传文件至当前目录"><a href="javascript:void(0);" onclick="select_file();">上传</a> </span>
+        </div>
     </div>
     <div class="idx_list">
         <div class="list_item list_bold">
@@ -23,17 +27,37 @@
             <div class="list_third">文件大小</div>
         </div>
         <div class="list_item">
-            <div class="list_first"><a href="{{../context_path}}/download?file_path={{file_path}}">上一级..</a></div>
+            <div class="list_first"><a href="{{context_path}}/list?file_dir={{file_dir}}/..">上一级..</a></div>
         </div>
         {{#each file_list}}
+
+        {{#if is_dir}}<!-- 目录 -->
         <div class="list_item">
-            <div class="list_first">📄 <a href="{{../context_path}}/download?file_path={{file_path}}" target="_blank">{{file_name}}</a></div>
+            <div class="list_first">📁 <a href="{{../context_path}}/list?file_dir={{file_dir}}/{{file_name}}">{{file_name}}</a></div>
             <div class="list_second">{{date}} </div>
-            <div class="list_third">{{size}} </div>
+            <div class="list_third">{{file_size}} {{file_size_unit}}</div>
         </div>
+        {{else}}<!-- 文件 -->
+        <div class="list_item">
+            <div class="list_first">📄 <a href="{{../context_path}}/download?file_path={{file_dir}}/{{file_name}}" target="_blank">{{file_name}}</a></div>
+            <div class="list_second">{{date}} </div>
+            <div class="list_third">{{file_size}} {{file_size_unit}}</div>
+        </div>
+        {{/if}}
+
         {{/each}}
     </div>
 </div>
+
+<!-- 上传文件:start -->
+<div style="display:none;">
+    <form method="POST" enctype="multipart/form-data">
+        <!-- <input type="text" name="file_dir" class="form-control-file"  value="{{file_dir}}"/> -->
+        <input type="file" name="files" class="form-control-file" required="required" multiple onchange="upload(this);"/>
+    </form>
+</div>
+<!-- 上传文件:stop -->
+
 </body>
 <style>
     body{font-size:18px;}
@@ -45,4 +69,39 @@
     .list_second{width:15%;display:inline-block;}
     .list_third{width:10%;display:inline-block;}
 </style>
+<script>
+    function select_file(event){
+        if(event){
+            event.preventDefault();
+        }
+        document.querySelector("input[name=files]").click();
+    }
+    function upload(dom){
+        // check
+        alert("upload=>"+dom.value);
+        // submit
+        // dom.parentElement.submit();
+        this.submit(dom.parentElement);
+    }
+
+    function submit(url_suffix,form){
+        let header = {'Content-Type':'multipart/form-data',"file_dir":"{{file_dir}}"};
+        // 隐藏对话框
+        fetch("upload", {method: 'POST', body: new FormData(form),headers:header})
+            .then(response => response.json())
+            .then(data =>
+                function () {
+                    if(!data || 1!=data.status){
+                        alert(data.msg);
+                        return;
+                    }
+                    alert(data.msg);
+                    window.location.reload();
+                }()
+            )
+            .catch(error => console.log("上传超时,请刷新后重试~")
+            );
+    }
+
+</script>
 </html>
