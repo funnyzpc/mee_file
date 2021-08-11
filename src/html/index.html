@@ -19,7 +19,8 @@
     </div>
     <div class="idx_list">
         <p></p>
-        <p>📁 <a href="/mee_file/list" >文件目录中心</a></p>
+        <p>📁 <a href="/mee_file/list" onclick="fill(this);">文件目录中心</a></p>
+        <p>📁 <a href="/mee_file/list" onclick="javascript:this.href=dom.href+'?r='+(new Date().getTime())">文件目录中心2</a></p>
         <p></p>
     </div>
 </div>
@@ -29,4 +30,9 @@
     .main{top:0;left:0;width:40%;margin-left:30%;margin-top:2%;}
     .idx_title{text-align:center;color:#333;text-shadow: 1px 1px 4px #747478;}
 </style>
+<script>
+    function fill(dom){
+        dom.href=dom.href+"?r="+(new Date().getTime())
+    }
+</script>
 </html>

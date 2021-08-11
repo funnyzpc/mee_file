@@ -1,8 +1,9 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, HttpRequest, HttpMessage};
 use std::collections::HashMap;
 use crate::structs::result_build::ResultBuild;
 use crate::structs::user_token::UserToken;
 use actix_web::cookie::Cookie;
+use actix_web::cookie::SameSite;
 use time::Duration;
 
 /**
@@ -17,9 +18,9 @@ pub async fn login(params: web::Form<HashMap<String,String>>) -> HttpResponse {
     let password = params.get("password");
     let context_path = std::env::var("CONTEXT_PATH").unwrap();
 
-    if None == username || None == password{
+    if username.is_none() || password.is_none(){
         println!("用户或密码为空:{:?}->{:?}",username,password);
-        return HttpResponse::MovedPermanently().header("location",format!("{}/{}",context_path,"/login")).finish();
+        return HttpResponse::MovedPermanently().header("Location",format!("{}/{}",context_path,"/login")).finish();
     }
     // 从配置获取用户并检查
     let password_cfg =  std::env::var(format!("U.{}",&username.unwrap()));
@@ -27,7 +28,7 @@ pub async fn login(params: web::Form<HashMap<String,String>>) -> HttpResponse {
     match password_cfg {
         Err(error)=>{
             println!("用户不存在或密码错误:{:?}->{:?},{}",username,password,error);
-            return HttpResponse::MovedPermanently().header("location",format!("{}/{}",context_path,"/login")).finish();
+            return HttpResponse::MovedPermanently().header("Location",format!("{}/{}",context_path,"/login")).finish();
         },
         Ok(result)=>{
             if !result.eq(password.unwrap()){
@@ -38,28 +39,49 @@ pub async fn login(params: web::Form<HashMap<String,String>>) -> HttpResponse {
             }
         }
     }
-    // println!("登录成功:{:?}->{:?}",username,password);
-    // get token
     let token = UserToken::gen_token(username.unwrap());
-    // token to session
-    // let jwt = format!("bearer {}",token);
 
+    let r = chrono::offset::Local::now().timestamp();
     let one_hour = Duration::minutes(60);
     let mut cookie = Cookie::new("Authorization",format!("bearer {}",token));
-    cookie.set_path("/");
+    //cookie.set_path("/");
+    cookie.set_path(&context_path);
     cookie.set_http_only(true);
-    cookie.set_expires(None);
+    //cookie.set_expires(None);
     cookie.set_max_age(one_hour);
-    return HttpResponse::MovedPermanently().cookie(cookie).header("location",context_path).finish();
+    cookie.set_same_site(SameSite::Strict);
+    return HttpResponse::MovedPermanently().cookie(cookie).header("Location",format!("{}?r={}",context_path,r)).finish();
 }
 
 
 /**
  @description 登录页面
  **/
-pub async fn login_index() -> HttpResponse {
+pub async fn login_index(req:HttpRequest) -> HttpResponse {
     println!("===>login_index");
-    HttpResponse::Ok().content_type("text/html; charset=utf-8").body(INDEX_HTML)
+    // check auth
+    let  auth_token:Option<Cookie> = req.cookie("Authorization");
+    if let Some(auth_header) = auth_token{
+        let auth_str = auth_header.value();
+        if auth_str.starts_with("bearer") || auth_str.starts_with("Bearer") {
+            let token = auth_str[6..auth_str.len()].trim();
+            if let Ok(token_data) = UserToken::decode_token(token.to_string()) {
+                if UserToken::verify_token(&token_data).is_ok() {
+                    println!("cookie有效...:{:?}",req.headers());
+                    let context_path = std::env::var("CONTEXT_PATH").unwrap();
+                    let r = chrono::offset::Local::now().timestamp();
+                    //return HttpResponse::MovedPermanently().header("Location",format!("{}/list?r={}",context_path,r)).finish();
+                    return HttpResponse::MovedPermanently().header("Location",format!("{}?r={}",context_path,r)).finish();
+                }
+            }
+        }
+    }
+    HttpResponse::Ok()
+        .header("Cache-Control", "no-cache, no-store, must-revalidate")// HTTP 1.1.
+        .header("Pragma", "no-cache") // HTTP 1.0.
+        .header("Expires", "0")
+        .content_type("text/html; charset=utf-8")
+        .body(INDEX_HTML)
 }
 
 const  INDEX_HTML:&str =

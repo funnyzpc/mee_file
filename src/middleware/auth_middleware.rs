@@ -92,10 +92,14 @@ impl<S, B> Service for AuthenticationMiddleware<S>
 
         // 验证不通过
         return Box::pin(async move {
+            let r = chrono::offset::Local::now().timestamp();
             Ok(req.into_response(
                 HttpResponse::MovedPermanently()
-                    //TODO .del_cookie()
-                    .header("Location",context_path)
+                    .header("Location",format!("{}?r={}",context_path,r))
+                    // 一定要有,否则GET会被缓存
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")// HTTP 1.1.
+                    .header("Pragma", "no-cache") // HTTP 1.0.
+                    .header("Expires", "0")
                     .finish()
                     .into_body(),
             ))
