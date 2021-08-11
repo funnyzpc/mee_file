@@ -27,6 +27,7 @@ const  LIST_HTML:&str =
         <meta content="no-cache,must-revalidate" http-equiv="Cache-Control">
         <meta content="no-cache" http-equiv="pragma">
         <meta content="0" http-equiv="expires">
+        <meta http-equiv="Cache" content="no-cache">
         <meta content="telephone=no, address=no" name="format-detection">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta name="apple-mobile-web-app-capable" content="yes" />

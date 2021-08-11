@@ -70,6 +70,10 @@ const  INDEX_HTML:&str =
         <title>MEE file</title>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width,initial-scale=0.8,maximum-scale=1,minimum-scale=1,user-scalable=no">
+        <meta content="no-cache,must-revalidate" http-equiv="Cache-Control">
+        <meta content="no-cache" http-equiv="pragma">
+        <meta content="0" http-equiv="expires">
+        <meta http-equiv="Cache" content="no-cache">
         <link rel="shortcut icon" href="${ctxPath}/static/img/favicon.ico">
         <style type="text/css">
             body{

@@ -95,7 +95,7 @@ impl<S, B> Service for AuthenticationMiddleware<S>
             Ok(req.into_response(
                 HttpResponse::MovedPermanently()
                     //TODO .del_cookie()
-                    .header("location",context_path)
+                    .header("Location",context_path)
                     .finish()
                     .into_body(),
             ))
