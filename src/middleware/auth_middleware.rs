@@ -55,7 +55,6 @@ impl<S, B> Service for AuthenticationMiddleware<S>
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let uri_path = req.path();
         let context_path = format!("{}/login",std::env::var("CONTEXT_PATH").unwrap());
-        println!("context_path===>{}",&context_path);// /mee_file/login
         println!("call===>{}",&uri_path);
 
         if uri_path.eq(&context_path){
@@ -67,7 +66,8 @@ impl<S, B> Service for AuthenticationMiddleware<S>
                 Ok(res)
             });
         }
-        println!("call===>002");
+
+        // println!("call===>002");
 
         let  auth_token:Option<Cookie> = req.cookie("Authorization");
         if let Some(auth_header) = auth_token {

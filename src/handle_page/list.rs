@@ -21,6 +21,7 @@ pub async fn list(hb: web::Data<Handlebars<'_>>,params:web::Query<HashMap<String
         let full_dir_path = format!("{}/{}",base_dir,file_dir);
         let path_object = Path::new(&full_dir_path);
         if path_object.exists() && path_object.is_dir() {
+            // 校验目录,防止目录穿越
             let absolute_path = path_object.canonicalize().unwrap().into_os_string().into_string().unwrap();
             let base_dir_path = Path::new(&base_dir).canonicalize().unwrap().into_os_string().into_string().unwrap();
             // println!("path_object:{:?},base_dir:{}",absolute_path,&base_dir_path);// 绝对路径
@@ -43,9 +44,9 @@ pub async fn list(hb: web::Data<Handlebars<'_>>,params:web::Query<HashMap<String
                 dir_data_list.push(dir_item);
             }
             let file_dir = absolute_path.index(base_dir_path.len()+1..);
-            println!("dir_data_list:{:?}",dir_data_list);
+            // println!("file_dir:{},dir_data_list:{:?}",file_dir.replace("\\","/"),dir_data_list);
             let context_path = std::env::var("CONTEXT_PATH").unwrap();
-            let data_model = json!({"context_path":context_path,"file_dir":file_dir,"file_list":dir_data_list});
+            let data_model = json!({"context_path":context_path,"file_dir":file_dir.replace("\\","/"),"file_list":dir_data_list});
             let result_html = hb.render_template(LIST_HTML,&data_model).unwrap_or(String::from("<p>获取目录失败</p>"));
             // 返回
             return HttpResponse::Ok().content_type("text/html; charset=utf-8").body(result_html);
@@ -100,14 +101,19 @@ const  LIST_HTML:&str =
         <div class="idx_title">
             <div style="display:inline-block;">
                 <span style="font-weight:bold;font-size:24px;margin-right:32px;">目录: {{file_dir}} </span>
-                <span style="font-size:16px;" title="上传文件至当前目录"><a href="javascript:void(0);" onclick="select_file();">上传</a> </span>
+                <span style="font-size:16px;" title="上传文件至当前目录">
+                    <a href="javascript:void(0);" onclick="select_file();">上传</a>
+                    <a href="javascript:void(0);" onclick="create_dir();">创建目录</a>
+                </span>
             </div>
         </div>
         <div class="idx_list">
             <div class="list_item list_bold">
-                <div class="list_first">文件</div>
-                <div class="list_second">创建日期</div>
-                <div class="list_third">文件大小</div>
+                <div>&nbsp;&nbsp;</div>
+                <div class="list_first">名称</div>
+                <div class="list_second">日期</div>
+                <div class="list_third">大小</div>
+                <div>操作</div>
             </div>
             <div class="list_item">
                 <div class="list_first"><a href="{{context_path}}/list?file_dir={{file_dir}}/..">上一级..</a></div>
@@ -116,15 +122,23 @@ const  LIST_HTML:&str =
 
             {{#if is_dir}}<!-- 目录 -->
             <div class="list_item">
+                <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div>
                 <div class="list_first">📁 <a href="{{../context_path}}/list?file_dir={{file_dir}}/{{file_name}}">{{file_name}}</a></div>
                 <div class="list_second">{{date}} </div>
                 <div class="list_third">{{file_size}} {{file_size_unit}}</div>
+                <div class="list_block"><a href="javascript:void(0);" onclick="del(1,'{{file_name}}');">删除</a></div>
             </div>
             {{else}}<!-- 文件 -->
             <div class="list_item">
+                <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div>
                 <div class="list_first">📄 <a href="{{../context_path}}/download?file_path={{file_dir}}/{{file_name}}" target="_blank">{{file_name}}</a></div>
                 <div class="list_second">{{date}} </div>
                 <div class="list_third">{{file_size}} {{file_size_unit}}</div>
+                <div class="list_block">
+                    <a href="javascript:void(0);" onclick="del(0,'{{file_name}}');">删除</a>
+                    <a href="javascript:alert('开发中,敬请期待...');">预览</a>
+                </div>
+
             </div>
             {{/if}}
 
@@ -143,9 +157,10 @@ const  LIST_HTML:&str =
 
     </body>
     <style>
-        body{font-size:18px;}
-        .main{top:0;left:0;width:80%;margin-left:10%;margin-top:2%;}
+        body{font-size:18px;top:0;left:0;}
+        .main{width:84%;margin-left:8%;margin-top:2%;}
         .idx_title{color:#333;}
+        .list_block{display: inline-block;}
         .list_bold{font-weight:bold;font-size: 18px;}
         .list_item{margin:4px 8px;}
         .list_first{width:60%;display:inline-block;}
@@ -153,12 +168,14 @@ const  LIST_HTML:&str =
         .list_third{width:10%;display:inline-block;}
     </style>
     <script>
+        // 上传选择文件
         function select_file(event){
             if(event){
                 event.preventDefault();
             }
             document.querySelector("input[name=files]").click();
         }
+        // 上传文件
         function upload(dom){
             // check
             // alert("upload=>"+dom.value);
@@ -166,7 +183,7 @@ const  LIST_HTML:&str =
         }
 
         function submit(form){
-            let header = {"enctype":"multipart/form-data","file_dir":"{{file_dir}}"};
+            let header = {"enctype":"multipart/form-data","file_dir":encodeURI("{{file_dir}}")};
             // 隐藏对话框
             fetch("upload", {method: 'POST', body: new FormData(form),headers:header})
                 .then(response => response.json())
@@ -184,6 +201,76 @@ const  LIST_HTML:&str =
                 );
         }
 
+        // 条目着色
+        function do_sel(dom){
+            if(dom.checked){
+                dom.parentElement.parentElement.style.backgroundColor='#ece6ee';
+                dom.parentElement.parentElement.style.fontWeight='bold';
+                return;
+            }
+            dom.parentElement.parentElement.style.backgroundColor='';
+            dom.parentElement.parentElement.style.fontWeight='normal';
+        }
+
+        // 删除
+        function del(is_dir,del_path){
+            // if (true){
+            //     alert(is_dir+"||"+del_path);
+            //     return;
+            // }
+            let body_params = new URLSearchParams({"is_dir": is_dir,"del_path":"{{file_dir}}/"+del_path})
+            let header = {"Content-Type":"application/x-www-form-urlencoded"};
+            fetch("delete",{ method: 'POST', body: body_params ,headers:header})
+                .then(response => response.json())
+                .then(data =>
+                    function () {
+                        if(!data || 1!=data.status){
+                            alert(data.msg);
+                            return;
+                        }
+                        alert(data.msg);
+                        window.location.reload();
+                    }()
+                )
+                .catch(error => console.log("请求超时,请刷新后重试~")
+                );
+        }
+
+        // 创建目录
+        function create_dir(){
+            // input
+            let create_dir = prompt("请输入目录名称:");
+            if (!create_dir){
+                alert("您取消了输入~");
+                return;
+            }
+            if(create_dir.startsWith(".") || create_dir.indexOf("/")!=-1 || create_dir.indexOf("\\")!=-1 || create_dir.indexOf("..")!=-1 ){
+                alert("目录名非法[不可包含.\\/..]");
+                return;
+            }
+
+            alert("您创建的目录是:"+create_dir);
+            // submit
+            let formData = new FormData();
+            formData.append("file_dir", "{{file_dir}}");
+            formData.append("create_dir", create_dir);
+
+            let body_params = new URLSearchParams({"file_dir":"{{file_dir}}","create_dir":create_dir})
+            fetch("create_dir",{ method:'POST',body: body_params,headers:{"Content-Type":"application/x-www-form-urlencoded"}})
+                .then(response => response.json())
+                .then(data =>
+                    function () {
+                        if(!data || 1!=data.status){
+                            alert(data.msg);
+                            return;
+                        }
+                        alert(data.msg);
+                        window.location.reload();
+                    }()
+                )
+                .catch(error => console.log("异常,请刷新后重试:"+error)
+                );
+        }
     </script>
     </html>
     "#;

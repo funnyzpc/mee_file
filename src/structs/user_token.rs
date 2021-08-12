@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header, Algorithm};
 use jsonwebtoken::{DecodingKey, TokenData, Validation};
+use actix_web::{HttpRequest, HttpMessage};
+use actix_web::cookie::Cookie;
 
 // token加密方式
 const ALGORITHM:Algorithm = Algorithm::HS512;
@@ -50,6 +52,23 @@ impl UserToken {
             return Err(());
         }
         return Ok(());
+    }
+
+    // 获取用户名
+    pub fn get_username(req:HttpRequest)->Result<String,String>{
+        let  auth_token:Option<Cookie> = req.cookie("Authorization");
+        if let Some(auth_header) = auth_token{
+            let auth_str = auth_header.value();
+            if auth_str.starts_with("bearer") || auth_str.starts_with("Bearer") {
+                let token = auth_str[6..auth_str.len()].trim();
+                if let Ok(token_data) = UserToken::decode_token(token.to_string()) {
+                    if UserToken::verify_token(&token_data).is_ok() {
+                        return Ok(token_data.claims.username);
+                    }
+                }
+            }
+        }
+        Err("未能获取到用户名".to_owned())
     }
 
 }

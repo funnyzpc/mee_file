@@ -4,6 +4,7 @@ use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
 
 use crate::structs::result_build::ResultBuild;
+use urlencoding::decode;
 
 // 手动上传文件
 pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpResponse, Error> {
@@ -13,8 +14,8 @@ pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpRespo
     if file_dir.is_none(){
         return Ok(HttpResponse::Ok().json(ResultBuild::<u8>::fail_with_msg("字段名缺失[file_dir]")));
     }
-    let file_dir = file_dir.unwrap().to_str().unwrap();
-
+    let file_dir = decode(file_dir.unwrap().to_str().unwrap()).unwrap();
+    // println!("upload=>file_dir:{:?}",file_dir);
     // prefix path
     let perfix_path = format!("{}/{}",base_dir,file_dir);
 

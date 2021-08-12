@@ -24,7 +24,7 @@ mod util;
 mod handle_api;
 mod handle_page;
 use crate::handle_api::{auth_api,upload_api,download_api,list_api};
-use crate::handle_page::{index, login, list, download, upload};
+use crate::handle_page::{index, login, list, download, upload, delete, create_dir};
 use handlebars::Handlebars;
 
 
@@ -77,6 +77,8 @@ async fn main() -> std::io::Result<()> {
                 .route("list",web::get().to(list::list))
                 .route("download",web::get().to(download::download))
                 .route("upload",web::post().to(upload::upload))
+                .route("delete",web::post().to(delete::delete))
+                .route("create_dir",web::post().to(create_dir::create_dir))
             )
             // .service(Files::new(&format!("{}/{}",context_path,"list"), base_dir).show_files_listing())
         // 定位所有文件
