@@ -29,5 +29,5 @@ handlebars = "4"
 serde_json = "1"
 urlencoding = "2.1.0"
 
-#[profile.release]
-#lto = true
+[profile.release]
+lto = true
