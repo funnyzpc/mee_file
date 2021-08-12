@@ -11,7 +11,7 @@ use std::ops::Index;
 
 // 用户文件列表
 pub async fn list(hb: web::Data<Handlebars<'_>>,params:web::Query<HashMap<String,String>>) -> HttpResponse {
-    println!("mee_file => list:{:?}",params);
+    // println!("mee_file => list:{:?}",params);
     let  base_dir = std::env::var("BASE_DIR").unwrap();
 
     // 查找参数目录
@@ -23,7 +23,7 @@ pub async fn list(hb: web::Data<Handlebars<'_>>,params:web::Query<HashMap<String
         if path_object.exists() && path_object.is_dir() {
             let absolute_path = path_object.canonicalize().unwrap().into_os_string().into_string().unwrap();
             let base_dir_path = Path::new(&base_dir).canonicalize().unwrap().into_os_string().into_string().unwrap();
-            println!("path_object:{:?},base_dir:{}",absolute_path,&base_dir_path);// 绝对路径
+            // println!("path_object:{:?},base_dir:{}",absolute_path,&base_dir_path);// 绝对路径
             if !absolute_path.starts_with(&base_dir_path) || absolute_path.eq(&base_dir_path){
                 return list_base_dir(hb,&base_dir).await;
             }
@@ -42,11 +42,10 @@ pub async fn list(hb: web::Data<Handlebars<'_>>,params:web::Query<HashMap<String
                 };
                 dir_data_list.push(dir_item);
             }
-            let d = absolute_path.index(base_dir_path.len()+1..);
-            println!("d:{}",d);
+            let file_dir = absolute_path.index(base_dir_path.len()+1..);
             println!("dir_data_list:{:?}",dir_data_list);
             let context_path = std::env::var("CONTEXT_PATH").unwrap();
-            let data_model = json!({"context_path":context_path,"file_dir":d,"file_list":dir_data_list});
+            let data_model = json!({"context_path":context_path,"file_dir":file_dir,"file_list":dir_data_list});
             let result_html = hb.render_template(LIST_HTML,&data_model).unwrap_or(String::from("<p>获取目录失败</p>"));
             // 返回
             return HttpResponse::Ok().content_type("text/html; charset=utf-8").body(result_html);
