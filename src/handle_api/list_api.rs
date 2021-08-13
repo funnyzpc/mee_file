@@ -10,12 +10,11 @@ use crate::util::auth_util;
 
 // 列出指定目录文件
 pub async fn list_api(request: HttpRequest, params: web::Query<HashMap<String,String>>) -> HttpResponse {
-    println!("mee_file => list_api");
-
+    // println!("mee_file => list_api");
     let headers = request.headers();
-    println!("list_file::headers=>{:?}",headers);
+    // println!("list_file::headers=>{:?}",headers);
     info!("list_file::headers=>{:?}",headers);
-    println!("list_file::params=>{:?}",&params);
+    // println!("list_file::params=>{:?}",&params);
     info!("list_file::params=>{:?}",&params);
     let (auth_result,msg) = auth_util::auth(headers);
     if !auth_result{
@@ -30,6 +29,9 @@ pub async fn list_api(request: HttpRequest, params: web::Query<HashMap<String,St
         return HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg("参数缺失[file_dir]"));
     }
     let file_path = file_dir.unwrap();
+    if file_path.contains(".."){
+        return HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg("参数非法！"));
+    }
 
     let file_full_path = format!("{}/{}",base_dir,file_path);
     let file_path_object = Path::new(file_full_path.as_str());
@@ -38,13 +40,9 @@ pub async fn list_api(request: HttpRequest, params: web::Query<HashMap<String,St
         println!("{}",msg);
         return HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg(msg.as_str()));
     }
-    // let file_name = file_path_object.file_name().unwrap().to_str();
     let file_data = fs::read_dir(file_path_object).unwrap();
-    //let file_data = fs::read_dir(file_path_object)?;
     let mut user_file_list:Vec<String> = Vec::new();
-
     for path in file_data {
-        // println!("Name: {}", &path.unwrap().path().display());
         user_file_list.push(format!("{}/{}",file_dir.unwrap(),path.unwrap().path().file_name().unwrap().to_str().unwrap()));
     }
     HttpResponse::Ok().json(ResultBuild::success_with_data(user_file_list))

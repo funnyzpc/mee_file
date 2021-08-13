@@ -17,7 +17,7 @@ use crate::util::auth_util;
 
 // 下载文件
 pub async fn download_api(request: HttpRequest, file: web::Query<DownLoadFile>) -> HttpResponse {
-    println!("enter=>download_api");
+    // println!("enter=>download_api");
     let headers = request.headers();
     println!("download_file::headers=>{:?}",headers);
     println!("download_file::file=>{:?}",&file);

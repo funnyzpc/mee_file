@@ -32,6 +32,12 @@ pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpRespo
             return Ok(HttpResponse::Ok().json(ResultBuild::<String>::fail_with_msg("文件名缺失[2]")));
         }
         let filename = filename.unwrap();
+        if filename.contains("..")
+            || filename.contains("/")
+            || filename.contains("\\"){
+            return Ok(HttpResponse::Ok().json(ResultBuild::<i8>::fail_with_msg("文件名非法[..、/、\\]")));
+        }
+
         let file_path = format!("{}/{}", perfix_path, sanitize_filename::sanitize(&filename));
         println!("file_path=>{}",file_path);
         file_list.push(format!("{}/{}", file_dir, &filename));
@@ -41,9 +47,8 @@ pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpRespo
             let data = chunk.unwrap();
             f = web::block(move || f.write_all(&data).map(|_| f)).await?;
         }
-        return Ok(HttpResponse::Ok().json(ResultBuild::success_with_data(file_list)));
     }
     println!("file_list:{:?}",file_list);
-    Ok(HttpResponse::Ok().json(ResultBuild::<i8>::fail_with_msg("上传失败")))
+    Ok(HttpResponse::Ok().json(ResultBuild::success_with_data(file_list)))
 }
 

@@ -125,7 +125,7 @@ const  LIST_HTML:&str =
                 <!-- <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div> -->
                 <div class="list_first">📁 <a href="{{../context_path}}/list?file_dir={{file_dir}}/{{file_name}}">{{file_name}}</a></div>
                 <div class="list_second">{{date}} </div>
-                <div class="list_third">{{file_size}} {{file_size_unit}}</div>
+                <div class="list_third"><!-- {{file_size}} {{file_size_unit}} --></div>
                 <div class="list_block"><a href="javascript:void(0);" onclick="del(1,'{{file_name}}');">删除</a></div>
             </div>
             {{else}}<!-- 文件 -->
@@ -136,7 +136,7 @@ const  LIST_HTML:&str =
                 <div class="list_third">{{file_size}} {{file_size_unit}}</div>
                 <div class="list_block">
                     <a href="javascript:void(0);" onclick="del(0,'{{file_name}}');">删除</a>
-                    <a href="javascript:alert('开发中,敬请期待...');">预览</a>
+                    <a href="preview?file_path={{file_dir}}/{{file_name}}" target="_blank">预览</a>
                 </div>
 
             </div>
@@ -148,7 +148,7 @@ const  LIST_HTML:&str =
 
     <!-- 上传文件:start -->
     <div style="display:none;">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
             <!-- <input type="text" name="file_dir" class="form-control-file"  value="{{file_dir}}"/> -->
             <input type="file" name="files" class="form-control-file" required="required" multiple onchange="upload(this);"/>
         </form>

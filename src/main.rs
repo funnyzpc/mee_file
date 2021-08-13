@@ -3,14 +3,9 @@ use actix_web::{web, App, HttpServer};
 use actix_service::Service;
 use futures::FutureExt;
 
-
-// use actix_files::Files;
 use dotenv::dotenv;
 use actix_web::middleware::Logger;
 use env_logger::Env;
-
-// #[macro_use]
-// extern crate actix_web;
 
 #[macro_use]
 extern crate log;
@@ -24,7 +19,7 @@ mod util;
 mod handle_api;
 mod handle_page;
 use crate::handle_api::{auth_api,upload_api,download_api,list_api};
-use crate::handle_page::{index, login, list, download, upload, delete, create_dir};
+use crate::handle_page::{index, login, list, download, upload, delete, create_dir, preview};
 use handlebars::Handlebars;
 
 
@@ -69,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope(context_path.as_str())
                 .app_data(hb_ref.clone())
                 .app_data(web::PayloadConfig::new(1024*1024*256))// 256MB
+                //.app_data(web::FormConfig::limit(1024*1024*256))// 256MB
                 .wrap(middleware::auth_middleware::Authentication)
                 .wrap_fn(|request,service|{service.call(request).map(|response|response)  })
                 .route("",web::get().to(index::index))
@@ -79,6 +75,7 @@ async fn main() -> std::io::Result<()> {
                 .route("upload",web::post().to(upload::upload))
                 .route("delete",web::post().to(delete::delete))
                 .route("create_dir",web::post().to(create_dir::create_dir))
+                .route("preview",web::get().to(preview::preview))
             )
             // .service(Files::new(&format!("{}/{}",context_path,"list"), base_dir).show_files_listing())
         // 定位所有文件
