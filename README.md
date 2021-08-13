@@ -5,7 +5,7 @@
 
   这是一个简易的文件系统，小巧但功能俱全;特点儿是:快(堪称急速)、小巧、灵活、易用、使用友好(开发人员及非开发人员) 等等~
   
-
+  
 ### 基础功能
 + 可视化友好界面方便非用户操作
 + 权限控制:支持管理人员及非管理人员
@@ -38,6 +38,19 @@
 + 浏览器访问`http://127.0.0.1:${SERVER_PORT}/${CONTEXT_PATH}`(默认为_http://127.0.0.1:8012/mee_file_)
 + 登录用户名密码默认为 `admin `\ `1299`(可在_`.env`文件内配置)
 
+#### for linux
++ 下载`./bin`目录下`mee_file_linux`及`.env`文件
++ 保持 `mee_file_linux` 、`.env` 同一目录
++ 打开`.env`文件，配置`BASE_DIR`(挂载目录)，`CONTEXT_PATH`、`SERVER_PORT`等为选配目录
++ 赋权 `chmod a+x mee_file_linux`
++ 执行 `nohup ./mee_file_linux &`
++ 浏览器访问`http://127.0.0.1:${SERVER_PORT}/${CONTEXT_PATH}`(默认为_http://127.0.0.1:8012/mee_file_)
++ 登录用户名密码默认为 `admin `\ `1299`(可在_`.env`文件内配置)
+
+#### for macOs
+  
+  暂不清楚`macOs`是否支持`linux`可执行包，若不支持，请使用`源码编译`，下面有提供编译之步骤
+  
 ### 开发
 + 运行
   `cargo run`
