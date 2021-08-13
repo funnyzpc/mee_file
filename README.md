@@ -49,9 +49,11 @@
 
 #### for macOs
   
-  暂不清楚`macOs`是否支持`linux`可执行包，若不支持，请使用`源码编译`，下面有提供编译之步骤
+  暂不清楚`macOs`是否支持`linux`可执行包，若不支持，可使用`源码编译`，下面有提供编译之步骤
   
 ### 开发
++ 安装 `rust` -> `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+
 + 运行
   `cargo run`
   
