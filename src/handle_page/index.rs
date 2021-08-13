@@ -30,8 +30,8 @@ const  INDEX_HTML:&str =
         </div>
         <div class="idx_list">
             <p></p>
-            <p>📁 <a href="/mee_file/list">文件目录中心</a></p>
-            <p>📁 <a href="/mee_file/list">文件目录中心2</a></p>
+            <p>📁 <a href="/mee_file/list">挂载目录1</a></p>
+            <p>📁 <a href="/mee_file/list">挂载目录2</a></p>
             <p></p>
         </div>
     </div>

@@ -61,8 +61,8 @@ async fn main() -> std::io::Result<()> {
             // api接口
             .service(web::scope(&format!("{}/api",context_path))
                 .route("auth",web::get().to(auth_api::auth))
-                .route("upload",web::get().to(upload_api::upload_api))
-                .route("/list",web::get().to(list_api::list_api))
+                .route("upload",web::post().to(upload_api::upload_api))
+                .route("list",web::get().to(list_api::list_api))
                 .route("download",web::get().to(download_api::download_api))
             )
             // 后台

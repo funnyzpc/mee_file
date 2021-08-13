@@ -163,7 +163,7 @@ const  LIST_HTML:&str =
         .list_block{display: inline-block;}
         .list_bold{font-weight:bold;font-size: 18px;}
         .list_item{margin:4px 8px;}
-        .list_first{width:60%;display:inline-block;}
+        .list_first{width:60%;display:inline-block;cursor:pointer;}
         .list_second{width:15%;display:inline-block;}
         .list_third{width:10%;display:inline-block;}
     </style>
