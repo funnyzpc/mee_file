@@ -109,11 +109,11 @@ const  LIST_HTML:&str =
         </div>
         <div class="idx_list">
             <div class="list_item list_bold">
-                <div>&nbsp;&nbsp;</div>
-                <div class="list_first">名称</div>
+                <!-- <div class="list_block">&nbsp;&nbsp;</div> -->
+                <div class="list_first" title="试试双击哦~">名称</div>
                 <div class="list_second">日期</div>
                 <div class="list_third">大小</div>
-                <div>操作</div>
+                <div class="list_block">操作</div>
             </div>
             <div class="list_item">
                 <div class="list_first"><a href="{{context_path}}/list?file_dir={{file_dir}}/..">上一级..</a></div>
@@ -121,16 +121,16 @@ const  LIST_HTML:&str =
             {{#each file_list}}
 
             {{#if is_dir}}<!-- 目录 -->
-            <div class="list_item">
-                <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div>
+            <div class="list_item" ondblclick="do_sel(this);">
+                <!-- <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div> -->
                 <div class="list_first">📁 <a href="{{../context_path}}/list?file_dir={{file_dir}}/{{file_name}}">{{file_name}}</a></div>
                 <div class="list_second">{{date}} </div>
                 <div class="list_third">{{file_size}} {{file_size_unit}}</div>
                 <div class="list_block"><a href="javascript:void(0);" onclick="del(1,'{{file_name}}');">删除</a></div>
             </div>
             {{else}}<!-- 文件 -->
-            <div class="list_item">
-                <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div>
+            <div class="list_item" ondblclick="do_sel(this);">
+                <!-- <div class="list_block"><input type="checkbox" name="sel" onclick="do_sel(this);"/></div> -->
                 <div class="list_first">📄 <a href="{{../context_path}}/download?file_path={{file_dir}}/{{file_name}}" target="_blank">{{file_name}}</a></div>
                 <div class="list_second">{{date}} </div>
                 <div class="list_third">{{file_size}} {{file_size_unit}}</div>
@@ -203,21 +203,20 @@ const  LIST_HTML:&str =
 
         // 条目着色
         function do_sel(dom){
-            if(dom.checked){
-                dom.parentElement.parentElement.style.backgroundColor='#ece6ee';
-                dom.parentElement.parentElement.style.fontWeight='bold';
+            if(""==dom.style.backgroundColor){
+                dom.style.backgroundColor='#ece6ee';
+                dom.style.fontWeight='bold';
                 return;
             }
-            dom.parentElement.parentElement.style.backgroundColor='';
-            dom.parentElement.parentElement.style.fontWeight='normal';
+            dom.style.backgroundColor="";
+            dom.style.fontWeight='normal';
         }
 
         // 删除
         function del(is_dir,del_path){
-            // if (true){
-            //     alert(is_dir+"||"+del_path);
-            //     return;
-            // }
+            if(!confirm("确定删除吗删除后将不可恢复?"+del_path)){
+                return;
+            }
             let body_params = new URLSearchParams({"is_dir": is_dir,"del_path":"{{file_dir}}/"+del_path})
             let header = {"Content-Type":"application/x-www-form-urlencoded"};
             fetch("delete",{ method: 'POST', body: body_params ,headers:header})
@@ -228,7 +227,7 @@ const  LIST_HTML:&str =
                             alert(data.msg);
                             return;
                         }
-                        alert(data.msg);
+                        // alert(data.msg);
                         window.location.reload();
                     }()
                 )
@@ -241,20 +240,14 @@ const  LIST_HTML:&str =
             // input
             let create_dir = prompt("请输入目录名称:");
             if (!create_dir){
-                alert("您取消了输入~");
+                // alert("您取消了输入~");
                 return;
             }
             if(create_dir.startsWith(".") || create_dir.indexOf("/")!=-1 || create_dir.indexOf("\\")!=-1 || create_dir.indexOf("..")!=-1 ){
                 alert("目录名非法[不可包含.\\/..]");
                 return;
             }
-
-            alert("您创建的目录是:"+create_dir);
             // submit
-            let formData = new FormData();
-            formData.append("file_dir", "{{file_dir}}");
-            formData.append("create_dir", create_dir);
-
             let body_params = new URLSearchParams({"file_dir":"{{file_dir}}","create_dir":create_dir})
             fetch("create_dir",{ method:'POST',body: body_params,headers:{"Content-Type":"application/x-www-form-urlencoded"}})
                 .then(response => response.json())
@@ -264,7 +257,7 @@ const  LIST_HTML:&str =
                             alert(data.msg);
                             return;
                         }
-                        alert(data.msg);
+                        // alert(data.msg);
                         window.location.reload();
                     }()
                 )

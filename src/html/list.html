@@ -37,7 +37,7 @@
         {{#each file_list}}
 
         {{#if is_dir}}<!-- 目录 -->
-        <div class="list_item">
+        <div class="list_item" ondblclick="do_sel()">
             <div><input type="checkbox" name="sel" onclick="do_sel(this);"/></div>
             <div class="list_first">📁 <a href="{{../context_path}}/list?file_dir={{file_dir}}/{{file_name}}">{{file_name}}</a></div>
             <div class="list_second">{{date}} </div>
