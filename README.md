@@ -73,6 +73,11 @@
   - 下载[GET]
   `http://127.0.0.1:8012/api/download`
   
++ example (only java)
+    ```
+        java具体请参考`document/HmacSHA512Util.java及MeeFilesTest.java`)
+    ```
+
 + 密钥: `.env`文件内`COMMON_KEY`配置项
 
 + 打包
@@ -98,5 +103,5 @@
 + 重命名功能
 + 上传进度
 + `400`、`500`响应处理
-+ 
-+ 
++ 欢迎 `star` `fork` ,感谢提[`issues`](https://github.com/funnyzpc/mee_file/issues) 😘
++  ~ ~ ~
