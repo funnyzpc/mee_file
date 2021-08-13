@@ -23,6 +23,8 @@ pub async fn preview(params:web::Query<HashMap<String,String>>) -> HttpResponse 
     // 文本
     if file_path.ends_with(".txt")
         || file_path.ends_with(".java")
+        || file_path.ends_with(".js")
+        || file_path.ends_with(".css")
         || file_path.ends_with(".xml")
         || file_path.ends_with(".c")
         || file_path.ends_with(".go")
