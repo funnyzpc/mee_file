@@ -1,6 +1,6 @@
 use actix_multipart::Multipart;
 use actix_web::{web, Error, HttpResponse, HttpRequest};
-use futures::{StreamExt, TryStreamExt};
+use futures::TryStreamExt;
 use std::io::Write;
 use std::fs;
 
@@ -40,7 +40,7 @@ pub async fn upload_api(mut payload: Multipart, request: HttpRequest) -> Result<
     fs::create_dir_all(&perfix_path)?;
 
     let mut user_file_list:Vec<String> = Vec::new();
-    while let Ok(Some(mut field)) = payload.try_next().await {
+    while let Some(mut field) = payload.try_next().await? {
         let content_type = field.content_disposition().unwrap();
         let content_name = content_type.get_name();
         if content_name.is_none(){
@@ -60,11 +60,11 @@ pub async fn upload_api(mut payload: Multipart, request: HttpRequest) -> Result<
         let file_path = format!("{}/{}", perfix_path, sanitize_filename::sanitize(&filename));
         user_file_list.push(format!("{}/{}", path, &filename));
 
-        let mut f = web::block(|| std::fs::File::create(file_path)).await.unwrap();
+        let mut f = web::block(|| std::fs::File::create(file_path)).await??;
 
-        while let Some(chunk) = field.next().await {
-            let data = chunk.unwrap();
-            f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+        while let Some(chunk) = field.try_next().await? {
+            // let data = chunk.unwrap();
+            f = web::block(move || f.write_all(&chunk).map(|_| f)).await??;
         }
     }
     println!("user_file_list:{:?}",user_file_list);

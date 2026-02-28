@@ -49,7 +49,7 @@ pub async fn download_api(request: HttpRequest, file: web::Query<DownLoadFile>) 
     // achive_file(&file_full_path);
     let file_data = fs::read(file_path_object).unwrap();
     let content_disposition = format!("form-data; filename={}",file_name.unwrap());
-    HttpResponse::Ok().header("Content-Disposition",content_disposition).body(file_data)
+    HttpResponse::Ok().insert_header(("Content-Disposition",content_disposition)).body(file_data)
 }
 
 #[allow(dead_code)]

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>MEE文件中心</title>
+    <meta charset="utf-8"/>
     <meta content="application/xhtml+xml;charset=UTF-8" http-equiv="Content-Type">
     <meta content="no-cache,must-revalidate" http-equiv="Cache-Control">
     <meta content="no-cache" http-equiv="pragma">
@@ -10,21 +12,20 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>MEE文件中心</title>
 </head>
 <body>
 <div class="main">
     <div class="idx_title">
         <div style="display:inline-block;">
-            <span style="font-weight:bold;font-size:24px;margin-right:32px;">目录: {{file_dir}} </span>
-            <span style="font-size:16px;" title="上传文件至当前目录">
-                    <a href="javascript:void(0);" onclick="select_file();">上传</a>
+            <span style="font-size:24px;margin-right:32px;">当前目录: {{file_dir}} </span>
+            <span style="font-size:16px;">
+                    <a href="javascript:void(0);" onclick="select_file();" title="上传文件至当前目录">上传文件</a> &nbsp;&nbsp;
                     <a href="javascript:void(0);" onclick="create_dir();">创建目录</a>
                 </span>
         </div>
     </div>
     <div class="idx_list">
-        <div class="list_item list_bold">
+        <div class="list_item list_title">
             <!-- <div class="list_block">&nbsp;&nbsp;</div> -->
             <div class="list_first" title="试试双击哦~">名称</div>
             <div class="list_second">日期</div>
@@ -32,7 +33,7 @@
             <div class="list_block">操作</div>
         </div>
         <div class="list_item">
-            <div class="list_first"><a href="{{context_path}}/list?file_dir={{file_dir}}/..">上一级..</a></div>
+            <div class="list_first"><a href="{{context_path}}/list?file_dir={{file_dir}}/..">上一级&nbsp;&nbsp;..</a></div>
         </div>
         {{#each file_list}}
 
@@ -73,15 +74,33 @@
 
 </body>
 <style>
-    body{font-size:18px;top:0;left:0;}
+    body{font-size:16px;top:0;left:0;}
     .main{width:84%;margin-left:8%;margin-top:2%;}
-    .idx_title{color:#333;}
+    .idx_title{color:#333;padding: 2px 8px;}
     .list_block{display: inline-block;}
-    .list_bold{font-weight:bold;font-size: 18px;}
     .list_item{margin:4px 8px;}
-    .list_first{width:60%;display:inline-block;cursor:pointer;}
+    .list_first{
+        width:60%;
+        display:inline-block;
+        cursor:pointer;
+    }
+    .idx_list .list_first:nth-child(n+2){
+        white-space: nowrap;        /* 强制文本不换行 */
+        overflow: hidden;           /* 隐藏超出容器的内容 */
+        text-overflow: ellipsis;    /* 超出部分显示省略号 */
+    }
     .list_second{width:15%;display:inline-block;}
     .list_third{width:10%;display:inline-block;}
+    .idx_list .list_title{
+        font-weight:bold;
+        font-size: 18px;
+        background-color: #a5fff2;
+        padding: 4px 6px;
+        border-radius: 4px;
+    }
+    .idx_list .list_item:nth-child(n+2){
+        border-bottom: 1px dotted #b6b5b5;
+    }
 </style>
 <script>
     // 上传选择文件
@@ -109,7 +128,7 @@
                         alert(data.msg);
                         return;
                     }
-                    alert(data.msg);
+                    /* alert(data.msg); */
                     window.location.reload();
                 }()
             )

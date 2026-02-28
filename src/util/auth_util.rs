@@ -1,5 +1,5 @@
+use actix_web::http::header::{HeaderMap, HeaderValue};
 use hmac_sha512::HMAC;
-use actix_web::http::{HeaderValue, HeaderMap};
 
 // 认证密钥
 // const COMMON_KEY:&str= "|1a59deaf6^%$#@5b14fa09a*&^3a27c749b6)f9(23|";

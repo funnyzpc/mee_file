@@ -2,32 +2,33 @@
 name = "mee_file"
 version = "0.5.1"
 authors = ["shadow <funnyzpc@gmail.com>"]
-edition = "2018"
+edition = "2024"
 
 [dependencies]
-actix-multipart = "0.3"
-actix-web = "3"
+actix-multipart = "0.7"
+actix-web = "4"
 futures = "0.3"
-sanitize-filename = "0.3.0"
+sanitize-filename = "0.6"
 #actix-files = "0.5.0"
-hmac-sha512 = "0.1.9"
+hmac-sha512 = "0.1"
 hex = "0.4.3"
 chrono = "0.4.19"
 serde = { version = "1.0.126", features = ["derive"] }
 dotenv = "0.15.0"
-env_logger = "0.8.3"
+env_logger = "0.11"
 # uuid = { version = "0.8", features = ["serde", "v4"] }
 # see: https://github.com/emreyalvac/actix-web-jwt
 # jsonwebtoken = "7.2.0"
 log = "0.4"
 
-actix-service = "1"
+# actix-service = "1"
 jsonwebtoken = "7"
 bcrypt = "0.9.0"
 time = "0.2"
 handlebars = "4"
 serde_json = "1"
-urlencoding = "2.1.0"
+urlencoding = "2.1"
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
 
 [profile.release]
 lto = true

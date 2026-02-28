@@ -1,8 +1,7 @@
 use actix_multipart::Multipart;
 use actix_web::{web, Error, HttpResponse, HttpRequest};
-use futures::{StreamExt, TryStreamExt};
+use futures::TryStreamExt;
 use std::io::Write;
-
 use crate::structs::result_build::ResultBuild;
 use urlencoding::decode;
 
@@ -20,7 +19,7 @@ pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpRespo
     let perfix_path = format!("{}/{}",base_dir,file_dir);
 
     let mut file_list:Vec<String> = Vec::new();
-    while let Ok(Some(mut field)) = payload.try_next().await {
+    while let Some(mut field) = payload.try_next().await? {
         let content_type = field.content_disposition().unwrap();
         let content_name = content_type.get_name();
         println!("content_name=>{:?}",content_name);
@@ -42,10 +41,9 @@ pub async fn upload(mut payload: Multipart, req:HttpRequest) -> Result<HttpRespo
         println!("file_path=>{}",file_path);
         file_list.push(format!("{}/{}", file_dir, &filename));
         // File::create is blocking operation, use threadpool
-        let mut f = web::block(|| std::fs::File::create(file_path)).await.unwrap();
-        while let Some(chunk) = field.next().await {
-            let data = chunk.unwrap();
-            f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+        let mut f = web::block(|| std::fs::File::create(file_path)).await??;
+        while let Some(chunk) = field.try_next().await? {
+            f = web::block(move || f.write_all(&chunk).map(|_| f)).await??;
         }
     }
     println!("file_list:{:?}",file_list);

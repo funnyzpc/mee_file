@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse};
 use std::fs;
 use std::path::Path;
-
+use actix_web::http::header;
 use crate::structs::result_build::ResultBuild;
 use crate::structs::download_file::DownLoadFile;
 
@@ -34,5 +34,6 @@ pub async fn download(/*request: HttpRequest, */file: web::Query<DownLoadFile>) 
     // achive_file(&file_full_path);
     let file_data = fs::read(file_path_object).unwrap();
     let content_disposition = format!("form-data; filename={}",file_name.unwrap());
-    HttpResponse::Ok().header("Content-Disposition",content_disposition).body(file_data)
+    // HttpResponse::Ok().header("Content-Disposition",content_disposition).body(file_data)
+    HttpResponse::Ok().insert_header((header::CONTENT_DISPOSITION, content_disposition)).body(file_data)
 }

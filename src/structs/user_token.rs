@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header, Algorithm};
 use jsonwebtoken::{DecodingKey, TokenData, Validation};
-use actix_web::{HttpRequest, HttpMessage};
+use actix_web::{HttpRequest};
 use actix_web::cookie::Cookie;
 
 // token加密方式
@@ -28,7 +28,8 @@ impl UserToken {
 
     // token生成
     pub fn gen_token(username:&String) -> String {
-        let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
+        //let now = Utc::now().timestamp_nanos() / 1_000_000_000; // nanosecond -> second
+        let now = Utc::now().timestamp_nanos_opt().unwrap() / 1_000_000_000; // nanosecond -> second
         let payload = UserToken {
             iat: now,
             iss: "sys".to_owned(),

@@ -37,7 +37,7 @@ pub async fn preview(params:web::Query<HashMap<String,String>>) -> HttpResponse 
         if file_content.is_err(){
             return HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg("文件读取失败~"));
         }
-        let dec_content = &file_content.unwrap()
+        let dec_content = file_content.unwrap()
             //.replace("\n","\r\n")
             .replace("	","&nbsp;&nbsp;")
             .replace(" ","&nbsp;")
@@ -80,6 +80,6 @@ pub async fn preview(params:web::Query<HashMap<String,String>>) -> HttpResponse 
     }
 
     // 返回
-    return HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg("读取文件失败[2]"));
+    HttpResponse::Ok().json(ResultBuild::<&str>::fail_with_msg("读取文件失败[2]"))
 
 }

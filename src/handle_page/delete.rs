@@ -7,7 +7,7 @@ use crate::structs::result_build::ResultBuild;
 
 // 删除目录或文件
 pub async fn delete(params:web::Form<HashMap<String,String>>,req:HttpRequest) -> HttpResponse {
-    println!("....=>delete:{:?}",params);
+    println!("删除参数=>delete:{:?}",params);
     // 校验权限
     let username =  UserToken::get_username(req);
     if username.is_err() || !"admin".eq(username.unwrap().as_str()){
@@ -51,6 +51,6 @@ pub async fn delete(params:web::Form<HashMap<String,String>>,req:HttpRequest) ->
         }
     }
     // 响应用户
-    return HttpResponse::Ok().json(ResultBuild::<&str>::success());
+    HttpResponse::Ok().json(ResultBuild::<&str>::success())
 
 }

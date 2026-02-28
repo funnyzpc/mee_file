@@ -1,70 +1,66 @@
+use std::future::{Ready, ready};
 
-use actix_service::{Service, Transform};
-use actix_web::{Error, HttpResponse, dev::{ServiceRequest, ServiceResponse},HttpMessage};
-use futures::{
-    future::{ok, Ready},
-    Future,
-};
-use std::{
-    pin::Pin,
-    task::{Context, Poll},
+use actix_web::{
+    Error, HttpResponse,
+    body::EitherBody,
+    dev::{self, Service, ServiceRequest, ServiceResponse, Transform}
 };
 use actix_web::cookie::Cookie;
+use futures_util::future::LocalBoxFuture;
+use futures_util::{FutureExt, TryFutureExt};
 use crate::structs::user_token::UserToken;
 
 pub struct Authentication;
 
-impl<S, B> Transform<S> for Authentication
-    where
-        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-        S::Future: 'static,
-        B: 'static,
+impl<S, B> Transform<S, ServiceRequest> for Authentication
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S::Future: 'static,
+    B: 'static,
 {
-    type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type InitError = ();
     type Transform = AuthenticationMiddleware<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(AuthenticationMiddleware { service })
+        ready(Ok(AuthenticationMiddleware { service }))
     }
 }
-
-
 pub struct AuthenticationMiddleware<S> {
     service: S,
 }
 
-impl<S, B> Service for AuthenticationMiddleware<S>
-    where
-        S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-        S::Future: 'static,
-        B: 'static,
+impl<S, B> Service<ServiceRequest> for AuthenticationMiddleware<S>
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S::Future: 'static,
+    B: 'static,
 {
-    type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.service.poll_ready(cx)
-    }
+    dev::forward_ready!(service);
 
-    fn call(&mut self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, req: ServiceRequest) -> Self::Future {
         let uri_path = req.path();
         let context_path = format!("{}/login",std::env::var("CONTEXT_PATH").unwrap());
-        println!("call===>{}",&uri_path);
+        //println!("call===>{}",&uri_path);
 
         if uri_path.eq(&context_path){
-        //if *uri_path == &context_path.as_str(){
+            //if *uri_path == &context_path.as_str(){
             println!("call===>001");
-            let fut = self.service.call(req);
-            return Box::pin(async move {
-                let res = fut.await?;
-                Ok(res)
-            });
+            // let fut = self.service.call(req);
+            // return Box::pin(async move {
+            //     let res = fut.await?;
+            //     Ok(res)
+            // });
+            return self.service
+                .call(req)
+                .map_ok(ServiceResponse::map_into_left_body)
+                .boxed_local();
         }
 
         // println!("call===>002");
@@ -79,29 +75,41 @@ impl<S, B> Service for AuthenticationMiddleware<S>
                     // println!("after::decode_token");
                     if UserToken::verify_token(&token_data).is_ok() {
                         // println!("after::verify_token");
-                        let fut = self.service.call(req);
-                        return Box::pin(async move {
-                            let res = fut.await?;
-                            Ok(res)
-                        });
+                        // let fut = self.service.call(req);
+                        // return Box::pin(async move {
+                        //     let res = fut.await?;
+                        //     Ok(res)
+                        // });
+                        return self.service
+                            .call(req)
+                            .map_ok(ServiceResponse::map_into_left_body)
+                            .boxed_local();
                     }
                 }
                 println!("验证不通过(Invalid token):{:?}",&auth_header);
             }
         }
 
+        // return Box::pin(async {
+        //     Ok(req.into_response(
+        //         HttpResponse::TooManyRequests()
+        //             .finish()
+        //             .map_into_right_body(),
+        //     ))
+        // });
+
         // 验证不通过
         return Box::pin(async move {
             let r = chrono::offset::Local::now().timestamp();
             Ok(req.into_response(
                 HttpResponse::MovedPermanently()
-                    .header("Location",format!("{}?r={}",context_path,r))
+                    .insert_header(("Location",format!("{}?r={}",context_path,r)))
                     // 一定要有,否则GET会被缓存
-                    .header("Cache-Control", "no-cache, no-store, must-revalidate")// HTTP 1.1.
-                    .header("Pragma", "no-cache") // HTTP 1.0.
-                    .header("Expires", "0")
+                    .insert_header(("Cache-Control", "no-cache, no-store, must-revalidate"))// HTTP 1.1.
+                    .insert_header(("Pragma", "no-cache")) // HTTP 1.0.
+                    .insert_header(("Expires", "0"))
                     .finish()
-                    .into_body(),
+                    .map_into_right_body(),
             ))
         });
     }

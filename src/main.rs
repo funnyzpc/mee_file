@@ -1,7 +1,5 @@
 
 use actix_web::{web, App, HttpServer};
-use actix_service::Service;
-use futures::FutureExt;
 
 use dotenv::dotenv;
 use actix_web::middleware::Logger;
@@ -21,8 +19,6 @@ mod handle_page;
 use crate::handle_api::{auth_api,upload_api,download_api,list_api};
 use crate::handle_page::{index, login, list, download, upload, delete, create_dir, preview};
 use handlebars::Handlebars;
-
-
 // const BASE_DIR:&str = if cfg!(target_os = "windows") {  "D:\\tmp" }else{ "/tmp" };
 
 #[actix_web::main]
@@ -30,7 +26,9 @@ async fn main() -> std::io::Result<()> {
     // 加载配置
     dotenv().ok();
     // 使用日志
-    std::env::set_var("RUST_LOG", "RUST_LOG=debug,actix_server=debug,actix_web=debug");
+    unsafe {
+        std::env::set_var("RUST_LOG", "RUST_LOG=debug,actix_server=debug,actix_web=debug");
+    }
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
     // base 文件目录(必须在.env文件配置)
@@ -40,7 +38,7 @@ async fn main() -> std::io::Result<()> {
 
     let date_time = chrono::offset::Local::now().format("%Y-%m-%d %H:%M:%S.%f").to_string();
     println!("{} server start at http://127.0.0.1:{}{}",date_time,server_port,&context_path);
-    std::fs::create_dir_all(base_dir).unwrap();
+    std::fs::create_dir_all(base_dir)?;
 
     // handlebar
     let hb_ref = web::Data::new(Handlebars::new());
@@ -66,7 +64,10 @@ async fn main() -> std::io::Result<()> {
                 .app_data(web::PayloadConfig::new(1024*1024*256))// 256MB
                 //.app_data(web::FormConfig::limit(1024*1024*256))// 256MB
                 .wrap(middleware::auth_middleware::Authentication)
-                .wrap_fn(|request,service|{service.call(request).map(|response|response)  })
+                // .wrap(simple::ReturnHttpResponse)
+                // .wrap(rate_limit::RateLimit)
+                // .wrap_fn(|request,service|{service.call(request).map(|response|response)  })
+                // .wrap_fn(|request,service|{ Either::Left(service.call(request).map(|res| res))  })
                 .route("",web::get().to(index::index))
                 .route("login",web::get().to(login::login_index))
                 .route("login",web::post().to(login::login))
